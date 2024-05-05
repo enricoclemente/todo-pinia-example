@@ -1,36 +1,47 @@
 <template>
-  <Input
-    v-model:value="field"
-    class="input"
-    @keyup.enter="handleAddTodo"
-    placeholder="Type name of todo"
-  />
-
-  <Typography>Done: {{ store.doneTodosCount }}</Typography>
-  <Typography>Important: {{ store.importantTodosCount }}</Typography>
-  <Typography>Active: {{ store.activeTodosCount }}</Typography>
+  <Row :align="'middle'" justify="space-between">
+    <Col :span="4">
+    <Typography.Title>TODOs</Typography.Title>
+    </Col>
+  </Row>
+  <Row :align="'middle'" justify="space-between">
+    <Col :span="14">
+    <Input v-model:value="field" class="input" @keyup.enter="handleAddTodo" placeholder="Type name of todo" />
+    </Col>
+    <Col :span="5" :offset="1">
+    <DatePicker />
+    </Col>
+    <Col :span="4"><Button>Add</Button></Col>
+  </Row>
+  <Row :align="'middle'" justify="start">
+    <Col :span="4">
+    <Typography>Done: {{ store.doneTodosCount }}</Typography>
+    </Col>
+    <Col :span="4">
+    <Typography>Important: {{ store.importantTodosCount }}</Typography>
+    </Col>
+    <Col :span="4">
+    <Typography>Active: {{ store.activeTodosCount }}</Typography>
+    </Col>
+  </Row>
   <List bordered :data-source="store.todos">
     <template #renderItem="{ item }">
       <ListItem>
         <div>
           <CheckOutlined class="icon" @click="store.toggleDone(item.id)" title="Toggle done" />
-          <ExclamationOutlined
-            color="red"
-            @click="store.toggleImportant(item.id)"
-            title="Toggle important"
-          />
+          <ExclamationOutlined color="red" @click="store.toggleImportant(item.id)" title="Toggle important" />
         </div>
         <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
           item.text
-        }}</Typography>
-        <CloseCircleOutlined @click="store.removeTodo(item.id)"
-      /></ListItem>
+          }}</Typography>
+        <CloseCircleOutlined @click="store.removeTodo(item.id)" />
+      </ListItem>
     </template>
   </List>
 </template>
 
 <script setup lang="ts">
-import { Input, List, ListItem, Typography } from 'ant-design-vue';
+import { DatePicker, Input, List, ListItem, Typography, Button, Space, Row, Col } from 'ant-design-vue';
 import { ref } from 'vue';
 import { useTodoStore } from '@/stores/todo';
 import { v4 as uuidv4 } from 'uuid';
@@ -60,12 +71,15 @@ function handleAddTodo() {
 .input {
   margin: 15px 0;
 }
+
 .icon {
   margin-right: 10px;
 }
+
 .line-through {
   text-decoration: line-through;
 }
+
 .text-bold {
   font-weight: 700;
 }
