@@ -41,6 +41,9 @@ import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutl
 const field = ref('');
 const store = useTodoStore();
 
+// at startup get all todos from server
+store.getTodos()
+
 function createTodo(text: string) {
   return { text, id: uuidv4(), done: false, important: false };
 }
