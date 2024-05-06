@@ -9,9 +9,9 @@
     <Input v-model:value="field" class="input" @keyup.enter="handleAddTodo" placeholder="Type name of todo" />
     </Col>
     <Col :span="5" :offset="1">
-    <DatePicker />
+    <DatePicker v-model="date" :placeholder="date ? `${date.toDateString()}` : 'Select a date'"/>
     </Col>
-    <Col :span="4"><Button>Add</Button></Col>
+    <Col :span="4"><Button @click="handleAddTodo">Add</Button></Col>
   </Row>
   <Row :align="'middle'" justify="start">
     <Col :span="4">
@@ -31,9 +31,18 @@
           <CheckOutlined class="icon" @click="store.toggleDone(item.id)" title="Toggle done" />
           <ExclamationOutlined color="red" @click="store.toggleImportant(item.id)" title="Toggle important" />
         </div>
-        <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
+        <div>
+          <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
           item.text
-          }}</Typography>
+          }}
+        </Typography>
+          <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
+            new Date(item.date).toDateString()
+          }}
+        </Typography>
+        </div>
+        
+        
         <CloseCircleOutlined @click="store.removeTodo(item.id)" />
       </ListItem>
     </template>
@@ -50,17 +59,18 @@ import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
 
 const field = ref('');
+const date = ref(new Date())
 const store = useTodoStore();
 
 // at startup get all todos from server
 store.getTodos()
 
-function createTodo(text: string) {
-  return { text, id: uuidv4(), done: false, important: false };
+function createTodo(text: string, date: Date) {
+  return { text, id: uuidv4(), date, done: false, important: false };
 }
 
 function handleAddTodo() {
-  const todo = createTodo(field.value);
+  const todo = createTodo(field.value, date.value);
   store.addTodo(todo);
 
   field.value = '';
