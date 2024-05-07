@@ -3,16 +3,20 @@
     <Col :span="4">
     <Typography.Title>TODOs</Typography.Title>
     </Col>
-  </Row>
-  <Row :align="'middle'" justify="space-between">
-    <Col :span="14">
-    <Input v-model:value="field" class="input" @keyup.enter="handleAddTodo" placeholder="Type name of todo" />
+    <Col :span="4">
+    <Button @click="showModal">New +</Button>
     </Col>
-    <Col :span="5" :offset="1">
-    <DatePicker v-model="date" :placeholder="date ? `${date.toDateString()}` : 'Select a date'"/>
-    </Col>
-    <Col :span="4"><Button @click="handleAddTodo">Add</Button></Col>
   </Row>
+  <Modal :visible="modalOpened" title="Create your new TODO" :ok-text="'Add'" :onOk="handleOk" :onCancel="hideModal">
+    <Form>
+      <Form.Item>
+        <Input v-model:value="text" class="input" placeholder="Type name of todo" />
+      </Form.Item>
+      <Form.Item>
+        <DatePicker v-model="date" :placeholder="date !== undefined ? `${date.toDateString()}` : 'Select a date'" />
+      </Form.Item>
+    </Form>
+  </Modal>
   <Row :align="'middle'" justify="start">
     <Col :span="4">
     <Typography>Done: {{ store.doneTodosCount }}</Typography>
@@ -33,16 +37,14 @@
         </div>
         <div>
           <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
-          item.text
+            item.text
           }}
-        </Typography>
+          </Typography>
           <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
             new Date(item.date).toDateString()
           }}
-        </Typography>
+          </Typography>
         </div>
-        
-        
         <CloseCircleOutlined @click="store.removeTodo(item.id)" />
       </ListItem>
     </template>
@@ -50,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { DatePicker, Input, List, ListItem, Typography, Button, Space, Row, Col } from 'ant-design-vue';
+import { DatePicker, Input, List, ListItem, Typography, Button, Space, Row, Col, Form, Modal } from 'ant-design-vue';
 import { ref } from 'vue';
 import { useTodoStore } from '@/stores/todo';
 import { v4 as uuidv4 } from 'uuid';
@@ -58,8 +60,34 @@ import CloseCircleOutlined from '@ant-design/icons-vue/lib/icons/CloseCircleOutl
 import CheckOutlined from '@ant-design/icons-vue/lib/icons/CheckOutlined';
 import ExclamationOutlined from '@ant-design/icons-vue/lib/icons/ExclamationOutlined';
 
-const field = ref('');
-const date = ref(new Date())
+// Modal handling
+const modalOpened = ref<boolean>(false)
+
+const showModal = () => {
+  modalOpened.value = true;
+};
+
+const hideModal = () => {
+  modalOpened.value = false;
+  resetTodo()
+}
+
+const handleOk = (e: MouseEvent) => {
+  console.log("E PERCHEé")
+  modalOpened.value = false;
+  handleAddTodo()
+  resetTodo()
+};
+
+
+const text = ref<string>('');
+const date = ref<Date>(new Date())
+
+const resetTodo = () => {
+  text.value = ""
+  date.value = new Date()
+}
+
 const store = useTodoStore();
 
 // at startup get all todos from server
@@ -70,10 +98,10 @@ function createTodo(text: string, date: Date) {
 }
 
 function handleAddTodo() {
-  const todo = createTodo(field.value, date.value);
+  const todo = createTodo(text.value, date.value || new Date());
   store.addTodo(todo);
 
-  field.value = '';
+  text.value = '';
 }
 </script>
 
