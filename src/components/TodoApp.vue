@@ -1,10 +1,12 @@
 <template>
-  <Row :align="'middle'" justify="space-between">
+  <Row :align="'middle'">
     <Col :span="4">
     <Typography.Title>TODOs</Typography.Title>
     </Col>
-    <Col :span="4">
-    <Button @click="showModal">New +</Button>
+    <Col :span="4" :offset="16">
+    <Row justify="end">
+      <Button type="primary" size="middle" @click="showModal">New +</Button>
+    </Row>
     </Col>
   </Row>
   <Modal :visible="modalOpened" :title="editMode ? 'Update your TODO' : 'Create your new TODO'"
@@ -15,7 +17,7 @@
       </Form.Item>
       <Form.Item label="Date" v-bind="validateInfos.date">
         <DatePicker v-model="modelRef.date"
-          :placeholder="modelRef.date !== undefined ? `${modelRef.date}` : 'Select a date'" />
+          :placeholder="modelRef.date !== undefined ? `${modelRef.date.toLocaleDateString()}` : 'Select a date'" />
       </Form.Item>
     </Form>
   </Modal>
@@ -30,34 +32,48 @@
     <Typography>Active: {{ store.activeTodosCount }}</Typography>
     </Col>
   </Row>
-  <List bordered :data-source="store.todos">
+  <List bordered :data-source="store.todos" :style="{ paddingTop: '10px' }">
     <template #renderItem="{ item }">
-      <ListItem>
-        <div>
-          <CheckOutlined class="icon" @click="store.toggleDone(item.id)" title="Toggle done" />
-          <ExclamationOutlined color="red" @click="store.toggleImportant(item.id)" title="Toggle important" />
-        </div>
-        <div>
-          <Typography underline=true :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
-            item.text
-          }}
-          </Typography>
-          <Typography :class="{ 'line-through': item.done, 'text-bold': item.important }">{{
-            item.date
-          }}
-          </Typography>
-        </div>
-        <div>
-          <EditOutlined class="icon" @click="editTodo(item)" />
-          <CloseCircleOutlined @click="handleDeleteTodo(item.id)" />
-        </div>
-      </ListItem>
+      <Row :align="'middle'" justify="center" :style="{ paddingBottom: '10px' }">
+        <Col :span="3" :offset="0">
+        <CheckOutlined class="icon" :style="{ fontSize: '18px', color: 'green' }" @click="store.toggleDone(item.id)"
+          title="Toggle done" />
+        <ExclamationOutlined :style="{ fontSize: '18px', color: 'red' }" @click="store.toggleImportant(item.id)"
+          title="Toggle important" />
+        </Col>
+        <Col :span="16">
+        <Row :align="'middle'" justify="center">
+          <Col :span="24">
+          <Row :align="'middle'" justify="center">
+            <Typography :class="{ 'line-through': item.done, 'text-bold': item.important, 'text-center': true }"
+              :style="{ fontSize: '18px' }">{{
+                item.text
+              }}
+            </Typography>
+          </Row>
+          <Row :align="'middle'" justify="center">
+            <Typography :class="{ 'line-through': item.done, 'text-bold': item.important, 'text-center': true }">{{
+              new Date(item.date).toLocaleDateString()
+              }}
+            </Typography>
+          </Row>
+          </Col>
+        </Row>
+        </Col>
+        <Col :span="3">
+        <Row :align="'middle'" justify="end">
+          <EditOutlined class="icon" :style="{ fontSize: '18px' }" @click="editTodo(item)" />
+          <CloseCircleOutlined class="icon" :style="{ fontSize: '18px' }" @click="handleDeleteTodo(item.id)" />
+        </Row>
+        </Col>
+      </Row>
+
     </template>
   </List>
 </template>
 
 <script setup lang="ts">
-import { DatePicker, Input, List, ListItem, Typography, Button, Space, Row, Col, Form, Modal, message } from 'ant-design-vue';
+import { DatePicker, Input, List, ListItem, Typography, Button, Row, Col, Form, Modal, message } from 'ant-design-vue';
 import { ref, reactive, toRaw } from 'vue';
 import { useTodoStore } from '@/stores/todo';
 import { v4 as uuidv4 } from 'uuid';
@@ -211,7 +227,15 @@ const openErrorMessage = (messageText: string) => {
   text-decoration: line-through;
 }
 
+h1.ant-typography {
+  margin-top: 15px
+}
+
 .text-bold {
   font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
 }
 </style>
