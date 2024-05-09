@@ -6,51 +6,18 @@ function toggleProp(prop: 'important' | 'done', id: string, todo: ITodo) {
   return todo.id === id ? { ...todo, [prop]: !todo[prop] } : todo;
 }
 
-export const useTodoStoreOld = defineStore('todo', () => {
-  const todos = ref<ITodo[]>([]);
-
-  function addTodo(todo: ITodo) {
-    todos.value.push(todo);
-  }
-
-  function removeTodo(id: string) {
-    todos.value = todos.value.filter((todo: ITodo) => todo.id !== id);
-  }
-
-  function toggleDone(id: string) {
-    console.log("MIMMO" + id)
-    todos.value = todos.value.map((todo) => toggleProp('done', id, todo));
-  }
-
-  function toggleImportant(id: string) {
-    todos.value = todos.value.map((todo) => toggleProp('important', id, todo));
-  }
-
-  const doneTodosCount = computed(() => todos.value.filter((todo) => todo.done).length);
-  const importantTodosCount = computed(() => todos.value.filter((todo) => todo.important).length);
-  const activeTodosCount = computed(() => todos.value.filter((todo) => !todo.done).length);
-
-  return {
-    addTodo,
-    removeTodo,
-    toggleDone,
-    toggleImportant,
-    doneTodosCount,
-    importantTodosCount,
-    activeTodosCount,
-    todos
-  };
-});
-
 export const useTodoStore = defineStore('todo', {
   state: () => ({
-    todos: [] as ITodo[]
+    todos: [] as ITodo[],
+    error: false,
   }),
   actions: {
     async getTodos() {
       try {
         const response = await fetch('http://localhost:5000/api/todos')
         this.todos = await response.json()
+        console.debug("Get all todos")
+        console.debug(this.todos)
       } catch (error) {
         console.error('Error fetching todos:', error)
       }
@@ -66,18 +33,24 @@ export const useTodoStore = defineStore('todo', {
         })
         const newTodo = await response.json()
         this.todos.push(newTodo)
-        console.log(this.todos)
+        this.error = false
+        console.debug("Added todo")
+        console.debug(newTodo)
       } catch (error) {
+        this.error = true
         console.error('Error creating todo:', error)
       }
     },
+    async updateTodoInfo(id: string, updates: Partial<ITodo>) {
+      this.updateTodo(id, updates)
+    },
     async toggleDone(id: string) {
       const updatedTodo = toggleProp('done', id, this.todos.find(todo => todo.id === id) as ITodo)
-      this.updateTodo(id, {done: updatedTodo.done, important: updatedTodo.important})
+      this.updateTodo(id, {done: updatedTodo.done})
     },
     async toggleImportant(id: string) {
       const updatedTodo = toggleProp('important', id, this.todos.find(todo => todo.id === id) as ITodo)
-      this.updateTodo(id, {done: updatedTodo.done, important: updatedTodo.important})
+      this.updateTodo(id, {important: updatedTodo.important})
     },
     async updateTodo(id: string, updates: Partial<ITodo>) {
       try {
@@ -91,7 +64,11 @@ export const useTodoStore = defineStore('todo', {
         const updatedTodo = await response.json()
         const index = this.todos.findIndex(todo => todo.id === id)
         this.todos[index] = updatedTodo
+        this.error = false
+        console.debug("Updated todo")
+        console.debug(updatedTodo)
       } catch (error) {
+        this.error = true
         console.error('Error updating todo:', error)
       }
     },
@@ -101,7 +78,10 @@ export const useTodoStore = defineStore('todo', {
           method: 'DELETE'
         })
         this.todos = this.todos.filter(todo => todo.id !== id)
+        this.error = false
+        console.debug("Deleted todo with id: " + id)
       } catch (error) {
+        this.error = true
         console.error('Error deleting todo:', error)
       }
     }
