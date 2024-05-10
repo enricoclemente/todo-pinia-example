@@ -1,6 +1,6 @@
 # todo_sample
 
-### Main logic location:
+## Main logic location:
 
 ### src/stores/todo.ts
 
