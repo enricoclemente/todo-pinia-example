@@ -5,14 +5,14 @@
     </Col>
     <Col :span="4" :offset="16">
     <Row justify="end">
-      <Button type="primary" size="middle" @click="showModal">New +</Button>
+      <Button type="primary" size="middle" @click="showModal">Add TODO</Button>
     </Row>
     </Col>
   </Row>
   <Modal :visible="modalOpened" :title="editMode ? 'Update your TODO' : 'Create your new TODO'"
     :ok-text="editMode ? 'Update' : 'Create'" :onOk="editMode ? handleEdit : handleOk" :onCancel="handleCancel">
-    <Form>
-      <Form.Item label="Title" v-bind="validateInfos.text">
+    <Form :label-col="{ span: 4 }" :wrapper-col="{ span: 16 }">
+      <Form.Item label="Name" v-bind="validateInfos.text">
         <Input v-model:value="modelRef.text" class="input" placeholder="Type name of todo" />
       </Form.Item>
       <Form.Item label="Date" v-bind="validateInfos.date">
@@ -22,15 +22,10 @@
     </Form>
   </Modal>
   <Row :align="'middle'" justify="start">
-    <Col :span="4">
-    <Typography>Done: {{ store.doneTodosCount }}</Typography>
-    </Col>
-    <Col :span="4">
-    <Typography>Important: {{ store.importantTodosCount }}</Typography>
-    </Col>
-    <Col :span="4">
-    <Typography>Active: {{ store.activeTodosCount }}</Typography>
-    </Col>
+    
+        <Typography class="icon">Done: {{ store.doneTodosCount }}</Typography>
+        <Typography class="icon">Important: {{ store.importantTodosCount }}</Typography>
+        <Typography class="icon">Active: {{ store.activeTodosCount }}</Typography>
   </Row>
   <List bordered :data-source="store.todos" :style="{ paddingTop: '10px' }">
     <template #renderItem="{ item }">
@@ -46,7 +41,7 @@
           <Col :span="24">
           <Row :align="'middle'" justify="center">
             <Typography :class="{ 'line-through': item.done, 'text-bold': item.important, 'text-center': true }"
-              :style="{ fontSize: '18px' }">{{
+              :style="{ fontSize: '17px' }">{{
                 item.text
               }}
             </Typography>
@@ -62,8 +57,8 @@
         </Col>
         <Col :span="3">
         <Row :align="'middle'" justify="end">
-          <EditOutlined class="icon" :style="{ fontSize: '18px' }" @click="editTodo(item)" />
-          <CloseCircleOutlined class="icon" :style="{ fontSize: '18px' }" @click="handleDeleteTodo(item.id)" />
+          <EditOutlined class="icon" :style="{ fontSize: '18px' }" @click="editTodo(item)" title="Edit"/>
+          <CloseCircleOutlined class="icon" :style="{ fontSize: '18px' }" @click="handleDeleteTodo(item.id)" title="Remove"/>
         </Row>
         </Col>
       </Row>
@@ -107,7 +102,7 @@ const rulesRef = reactive({
   text: [
     {
       required: true,
-      message: 'Please insert a title',
+      message: 'Please insert a name',
     },
   ],
   date: [
@@ -185,8 +180,8 @@ function handleEditTodo() {
   store.updateTodo(modelRef.id, { text: modelRef.text, date: modelRef.date })
     .then(() => {
       if (!store.error) {
-        openSuccessMessage('TODO updated!')
         modalOpened.value = false;
+        openSuccessMessage('TODO updated!')
         resetFields()
       } else {
         openErrorMessage('Error updating TODO! Server error')
